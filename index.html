@@ -240,7 +240,7 @@
     <!-- Name input -->
     <div class="field" id="nameField">
       <label class="cap" id="nameLabel">Your name</label>
-      <input type="text" id="nameInput" placeholder="e.g. Matthew" autocomplete="off" spellcheck="false">
+      <input type="text" id="nameInput" placeholder="e.g. John or John Smith" autocomplete="off" spellcheck="false">
       <div class="hint" id="modeHint" style="text-align:left;margin-top:6px;">
         We&rsquo;ll reshape your name to fit the galaxy. Type a first and last name and we&rsquo;ll reshape both.
       </div>
@@ -625,7 +625,7 @@ el("mode").addEventListener("click", (e) => {
   btn.classList.add("active");
   const inspired = state.mode === "inspired";
   el("nameLabel").textContent = inspired ? "Your name" : "Seed word (optional)";
-  el("nameInput").placeholder = inspired ? "e.g. Matthew" : "e.g. anything \u2014 same seed, same names";
+  el("nameInput").placeholder = inspired ? "e.g. John or John Smith" : "e.g. anything \u2014 same seed, same names";
   el("modeHint").textContent = inspired
     ? "We\u2019ll reshape your name to fit the galaxy. Type a first and last name and we\u2019ll reshape both."
     : "Leave blank for fully random, or type a seed to get repeatable results.";
