@@ -1,0 +1,10 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# local preview tooling (kept out of the repo)
+.claude/
+launch.json
+static-server.mjs
