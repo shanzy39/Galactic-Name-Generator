@@ -1,5 +1,7 @@
 # Galactic Name Generator
 
+**▶ [Try it live](https://shanzy39.github.io/Galactic-Name-Generator/)**
+
 A tiny, single-file web tool that forges an **original** character name to fit
 the species and class story you're about to roll. Made for those moments when
 you're staring at the character-creation screen and none of the suggested names
