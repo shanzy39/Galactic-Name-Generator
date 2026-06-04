@@ -448,12 +448,28 @@ const CLASSES = [
   { id:"agent",     label:"Imperial Agent",  fac:"imp", tone:"sleek" },
 ];
 
-/* Faction tone nudges: roguish/sleek favor shorter, brutal favors harder ends */
-function toneSurnameBias(rng, cls) {
-  // returns true if we should lean "harder/darker"
-  if (!cls) return false;
-  if (cls.tone === "brutal" || cls.tone === "hard" || cls.tone === "cunning") return rng() < 0.7;
-  return rng() < 0.2;
+/* Per-class tone profiles: shape name length and ending hardness so the chosen
+ * story actually flavors the result. extra = chance of an extra syllable,
+ * hardEnd = chance of a hard (consonant) ending vs a soft (vowel) one. */
+const TONES = {
+  noble:    { extra: 0.28, hardEnd: 0.30 },  // Jedi Knight
+  serene:   { extra: 0.22, hardEnd: 0.08 },  // Jedi Consular  - soft, flowing
+  stalwart: { extra: 0.30, hardEnd: 0.45 },  // Trooper        - solid
+  roguish:  { extra: 0.12, hardEnd: 0.25 },  // Smuggler       - short, punchy
+  brutal:   { extra: 0.42, hardEnd: 0.80 },  // Sith Warrior   - long, hard
+  cunning:  { extra: 0.30, hardEnd: 0.50 },  // Sith Inquisitor
+  hard:     { extra: 0.16, hardEnd: 0.65 },  // Bounty Hunter  - clipped, hard
+  sleek:    { extra: 0.10, hardEnd: 0.30 },  // Imperial Agent - short, clean
+};
+
+/* Pick an ending, biased toward consonant ("hard") or vowel ("soft") codas. */
+function pickEnd(rng, spec, hardEnd) {
+  const ends = spec.end || [""];
+  const soft = ends.filter(e => e === "" || /[aeiou]$/i.test(e));
+  const hard = ends.filter(e => e !== "" && /[^aeiou]$/i.test(e));
+  const useHard = rng() < hardEnd;
+  const pool = useHard ? (hard.length ? hard : ends) : (soft.length ? soft : ends);
+  return pick(rng, pool);
 }
 
 /* ---------- Sith honorifics (original epithets) ---------- */
@@ -464,11 +480,11 @@ const EPITHETS = [
 ];
 
 /* ---------- Core generators ---------- */
-function genStandardName(rng, spec, hard) {
+function genStandardName(rng, spec, tone) {
   let name = pick(rng, spec.onset).trim() + pick(rng, spec.mid);
-  // occasional extra syllable
-  if (rng() < 0.3) name += pick(rng, spec.mid);
-  name += pick(rng, spec.end);
+  // occasional extra syllable (brutal tones run longer, sleek/roguish stay short)
+  if (rng() < tone.extra) name += pick(rng, spec.mid);
+  name += pickEnd(rng, spec, tone.hardEnd);
   // tidy doubled letters at joins
   name = name.replace(/(.)\1\1+/g, "$1$1");
   if (spec.apostrophe && rng() < 0.6) {
@@ -479,17 +495,17 @@ function genStandardName(rng, spec, hard) {
   return cap(name);
 }
 
-function genSurname(rng, spec, hard) {
+function genSurname(rng, spec, tone) {
   if (spec.surGen) {
     // build an original surname from the same banks
-    let s = pick(rng, spec.onset).trim() + pick(rng, spec.mid) + pick(rng, spec.end);
+    let s = pick(rng, spec.onset).trim() + pick(rng, spec.mid) + pickEnd(rng, spec, tone.hardEnd);
     if (spec.apostrophe && rng() < 0.4) s = s.slice(0,2) + "'" + s.slice(2);
     return cap(s.replace(/(.)\1\1+/g, "$1$1"));
   }
   // curated-flavor list, but filter any accidental real-ish tokens marked with "-no"
   const pool = (spec.sur || []).filter(x => !/-no$|\?/.test(x) && x.length > 1);
   if (pool.length) return pick(rng, pool);
-  return genStandardName(rng, spec, hard);
+  return genStandardName(rng, spec, tone);
 }
 
 function genChiss(rng, spec) {
@@ -506,9 +522,9 @@ function genChiss(rng, spec) {
  * Reshapes a single typed word (a first name OR a surname) into a species-styled
  * name while preserving the word's rough consonant/vowel "shape".
  */
-function morphFromName(rng, raw, spec, isSurname) {
+function morphFromName(rng, raw, spec, isSurname, tone) {
   const clean = String(raw || "").toLowerCase().replace(/[^a-z]/g, "");
-  if (!clean) return isSurname ? genSurname(rng, spec, false) : genStandardName(rng, spec, false);
+  if (!clean) return isSurname ? genSurname(rng, spec, tone) : genStandardName(rng, spec, tone);
 
   // Break the typed word into vowel-delimited chunks to preserve its "shape"
   let chunks = clean.match(/[^aeiou]*[aeiou]+/g) || [clean];
@@ -527,7 +543,7 @@ function morphFromName(rng, raw, spec, isSurname) {
   if (spec.chiss) {
     out = out + pick(rng, spec.coreEnd);
   } else {
-    out += pick(rng, spec.end);
+    out += pickEnd(rng, spec, tone.hardEnd);
   }
   out = out.replace(/(.)\1\1+/g, "$1$1");
   // apostrophes a touch less likely on surnames so first/last don't both get them
@@ -543,7 +559,7 @@ function morphFromName(rng, raw, spec, isSurname) {
 function buildOne(rng, opts) {
   const spec = SPECIES[opts.species];
   const cls = CLASSES.find(c => c.id === opts.classId);
-  const hard = toneSurnameBias(rng, cls);
+  const tone = TONES[cls && cls.tone] || TONES.noble;
 
   let first, last;
 
@@ -556,13 +572,13 @@ function buildOne(rng, opts) {
       // Split the typed input into words. The first word seeds the first name;
       // if a surname (2+ words) was typed, the last word seeds the surname too.
       const tokens = opts.name.trim().split(/\s+/).filter(Boolean);
-      first = morphFromName(rng, tokens[0], spec);
+      first = morphFromName(rng, tokens[0], spec, false, tone);
       last = (tokens.length >= 2)
-        ? morphFromName(rng, tokens[tokens.length - 1], spec, true)
-        : genSurname(rng, spec, hard);
+        ? morphFromName(rng, tokens[tokens.length - 1], spec, true, tone)
+        : genSurname(rng, spec, tone);
     } else {
-      first = genStandardName(rng, spec, hard);
-      last = genSurname(rng, spec, hard);
+      first = genStandardName(rng, spec, tone);
+      last = genSurname(rng, spec, tone);
     }
   }
 
