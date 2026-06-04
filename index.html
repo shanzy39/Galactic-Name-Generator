@@ -215,6 +215,22 @@
   .copy:hover { color: #fff; border-color: var(--rep); }
   .copy.done { color: #5fe08a; border-color: #2f7a4d; }
 
+  .regen {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 600;
+    color: var(--rep);
+    background: #0a1424;
+    border: 1px solid var(--rep-dim);
+    border-radius: 10px; cursor: pointer;
+    transition: all .14s;
+  }
+  .regen svg { width: 15px; height: 15px; flex: none; }
+  .regen:hover { border-color: var(--rep); color: #fff; background: #0e1c30; }
+  .regen:active { transform: translateY(1px); }
+
   .hint { color: var(--muted); font-size: 12px; margin-top: 10px; text-align: center; }
   .empty { color: var(--muted); text-align: center; padding: 24px 0; font-size: 14px; }
   footer { text-align: center; color: #4f5e78; font-size: 12px; margin-top: 28px; line-height: 1.6; }
@@ -280,6 +296,10 @@
 
   <div class="panel">
     <div id="results"><div class="empty">Pick a species and a story, then hit generate.</div></div>
+    <button class="regen" id="regen" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+      <span>Regenerate</span>
+    </button>
   </div>
 
   <footer>
@@ -646,20 +666,22 @@ el("sithStyle").addEventListener("click", (e) => {
 
 /* generate */
 let rollCounter = 0;
-el("go").addEventListener("click", () => {
+function runGeneration(forceReroll) {
   state.name = el("nameInput").value.trim();
   if (!state.classId) {
+    el("regen").style.display = "none";
     flashResults('<div class="empty">Choose a class &amp; story first.</div>');
     return;
   }
-  // seed: inspired => name-derived; surprise => name (if any) else random; re-roll varies
+  // seed: inspired => always a fresh roll; surprise => deterministic from the seed
+  // word, unless there's no seed or the user asked to regenerate, then re-roll.
   let base;
   if (state.mode === "inspired") {
     base = (state.name || "wanderer") + "|" + state.species + "|" + state.classId + "|" + (rollCounter++);
+  } else if (state.name && !forceReroll) {
+    base = state.name + "|" + state.species + "|" + state.classId;
   } else {
-    base = state.name
-      ? state.name + "|" + state.species + "|" + state.classId
-      : String(Math.random()) + (rollCounter++);
+    base = (state.name || String(Math.random())) + "|" + state.species + "|" + state.classId + "|" + (rollCounter++);
   }
 
   const results = [];
@@ -674,7 +696,10 @@ el("go").addEventListener("click", () => {
     results.push(r);
   }
   renderResults(results);
-});
+  el("regen").style.display = "flex";
+}
+el("go").addEventListener("click", () => runGeneration(false));
+el("regen").addEventListener("click", () => runGeneration(true));
 
 function flashResults(html) { el("results").innerHTML = html; }
 
