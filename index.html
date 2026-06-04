@@ -395,28 +395,28 @@ const SPECIES = {
     label: "Chiss", meta: "tripartite, apostrophes",
     chiss: true,
     coreOnset: ["Kres","Vurl","Bes","Cor","Stenn","Iva","Pres","Sav","Aris","Forr","Niri","Hesh","Vanto"],
-    coreMid:  ["esh","aro","ven","ith","oro","ala","esti","an","oba","irr","ovo"],
-    coreEnd:  ["ssaro","inroki","odaro","irsi","uvis","abnar","esti","arin","obal","ovan","irruun"],
+    coreMid:  ["esh","aro","ven","ith","oro","ala","esti","an","oba","ir","ovo"],
+    coreEnd:  ["saro","inroki","odaro","irsi","uvis","abnar","esti","arin","obal","ovan","iruun"],
     short:    ["Vurawn","Stenn","Aris","Kresh","Beso","Vanno","Iruun","Presk"],
   },
   pureblood: {
     label: "Sith Pureblood", meta: "ancient, sibilant",
-    onset: ["Kha","Zash","Vol","Aru","Dre","Mae","Tyr","Vael","Sora","Khem","Ajun","Drash","Vorr","Sael"],
-    mid:   ["rus","goth","zar","ven","kar","mok","thes","rion","dyr","ssh"],
-    end:   ["ar","us","oth","is","ek","an","yr","esh"],
-    surGen: true,
+    onset: ["Kha","Zash","Vol","Aru","Dre","Mae","Tyr","Vael","Sora","Khem","Ajun","Dra","Vorr","Sael","Zar","Nys"],
+    mid:   ["ra","zo","ven","kar","mo","su","ri","sa","zar","na","esh"],
+    end:   ["ar","us","oth","is","an","yr","esh","a"],
+    sur:   ["Zashar","Voloth","Khaaris","Dravos","Sythar","Morzath","Velis","Tharil","Ravos","Kessar","Vornyth","Azhul"],
   },
   rattataki: {
     label: "Rattataki", meta: "harsh, clipped",
-    onset: ["Vrak","Dak","Ksh","Mor","Tek","Grask","Zul","Bron","Dre","Skir","Vol","Khr","Nas","Drov"],
-    mid:   ["nok","tar","gul","vek","rash","dun"],
+    onset: ["Vrak","Dak","Kosh","Mor","Tek","Grask","Zul","Bron","Dre","Skir","Vol","Khar","Nas","Drov"],
+    mid:   ["nok","tar","gul","vek","rak","dun"],
     end:   ["k","x","sh","r","n","z","ai"],
-    sur:   ["Drakk","Veng","Skarr","Morrn","Tulak","Vraxx","Gornn","Drev"],
+    sur:   ["Drakk","Veng","Skarr","Morrn","Vorgh","Vraxx","Gornn","Drev"],
   },
   cathar: {
     label: "Cathar", meta: "feline, rolling",
-    onset: ["Ra","Sha","Mri","Ka","Tyr","Lor","Naa","Fey","Saa","Mar","Korr","Aru","Jha","Saw"],
-    mid:   ["rrak","sha","mri","wan","rou","faa","ren","kaa","lor"],
+    onset: ["Ra","Sha","Mir","Ka","Tyr","Lor","Naa","Fey","Saa","Mar","Kor","Aru","Jha","Saw"],
+    mid:   ["rak","sha","mir","wan","rou","faa","ren","kaa","lor"],
     end:   ["r","sh","a","an","rr","ai","or"],
     surGen: true,
   },
@@ -432,7 +432,7 @@ const SPECIES = {
     onset: ["Ki","Naa","Oo","Shaa","Ee","Vaa","Loo","Mee","Saa","Nu","Oa","Yi","Wei","Suu"],
     mid:   ["too","sha","vee","loo","naa","mii","soo","wii"],
     end:   ["a","i","o","oo","ee","ya","ai"],
-    sur:   ["Fiskth","Naadu","Looma","Vaesh","Oolan","Mistaa","Suuvi","Weshaa"],
+    sur:   ["Fisal","Naadu","Looma","Vaesh","Oolan","Mistaa","Suuvi","Weshaa"],
   },
 };
 
@@ -482,8 +482,9 @@ const EPITHETS = [
 /* ---------- Core generators ---------- */
 function genStandardName(rng, spec, tone) {
   let name = pick(rng, spec.onset).trim() + pick(rng, spec.mid);
-  // occasional extra syllable (brutal tones run longer, sleek/roguish stay short)
-  if (rng() < tone.extra) name += pick(rng, spec.mid);
+  // occasional extra syllable (brutal tones run longer, sleek/roguish stay short),
+  // but never on an already-long base — keeps names pronounceable across the board
+  if (rng() < tone.extra && name.length < 7) name += pick(rng, spec.mid);
   name += pickEnd(rng, spec, tone.hardEnd);
   // tidy doubled letters at joins
   name = name.replace(/(.)\1\1+/g, "$1$1");
