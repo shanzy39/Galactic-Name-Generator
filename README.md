@@ -14,7 +14,7 @@ every name is assembled on the fly from invented syllable banks.
 
 - **Inspired by my name** - type your real name and it gets phonetically
   reshaped into something that still echoes you, but sounds at home in the
-  galaxy (e.g. *Matthew* &rarr; *Matthear Drashkaryr*).
+  galaxy (e.g. *Garrett Taylor* &rarr; *Garreus Tatorius*).
 - **Surprise me** - leave the field blank for a fully random pull, or type any
   seed word to get the same set of names back every time.
 
