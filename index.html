@@ -358,23 +358,23 @@ const SPECIES = {
     label: "Cyborg", meta: "human base + designation",
     onset: ["Vex","Kade","Rho","Dax","Cy","Nyx","Jax","Tev","Mox","Ren","Sev","Zane","Korr","Bly","Drax"],
     mid:   ["ter","den","ic","von","mar","rik","lan","tor"],
-    end:   ["o","us","an","ar","ex",""],
-    sur:   ["Halz","Vorn","Drexler","Kane","Steele","Voss","Rourke","Calder","Mercer","Stahl","Renn"],
+    end:   ["o","us","an","ar","ex","ix","on","yn","el",""],
+    sur:   ["Halz","Vorn","Drexler","Kane","Steele","Voss","Rourke","Caldax","Korven","Stahl","Renn","Volk","Daxon"],
     suffixDesignation: true,
   },
   miraluka: {
     label: "Miraluka", meta: "melodic, soft",
     onset: ["Ae","Lu","Ny","Se","Va","Il","Ae","Ko","Sha","Mae","Ori","Lae","Vei","Sira","Eli"],
     mid:   ["ri","lae","ven","sha","mi","no","lia","ra","ni","sei"],
-    end:   ["a","el","ia","en","is","ae","yn"],
-    sur:   ["Sunwalker","Lightveil","Noor","Sael","Aevir","Lumis","Calael","Veyra","Orrin","Sevael"],
+    end:   ["a","el","ia","en","is","ae","yn","ya","io","ee","in","yl","ys","ar","an","oe"],
+    sur:   ["Sunwalker","Lightveil","Noor","Sael","Aevir","Lumis","Calare","Veyra","Orrin","Sevran","Ilvenn","Thessa"],
   },
   mirialan: {
     label: "Mirialan", meta: "smooth, balanced",
     onset: ["Ji","Lu","Sa","Ki","Ven","Na","Te","Mo","Ral","Sha","Bo","Nu","Le","Ka"],
     mid:   ["mil","ra","ven","la","ko","sha","din","mo","ne"],
-    end:   ["a","o","la","ra","is","ka","en"],
-    sur:   ["Daro","Venn","Solu","Marek","Tano","Ralis","Brema","Komo","Senn","Vael"],
+    end:   ["a","o","la","ra","is","ka","en","an","il","yn","os","ar","in"],
+    sur:   ["Daro","Venn","Solu","Marek","Tano","Ralis","Brema","Komo","Sarel","Vorin"],
   },
   twilek: {
     label: "Twi'lek", meta: "flowing, apostrophes",
@@ -388,8 +388,8 @@ const SPECIES = {
     label: "Zabrak", meta: "hard, guttural",
     onset: ["Kor","Dra","Vra","Gar","Tash","Mor","Brak","Zek","Hru","Kha","Vos","Dre","Karg","Bron","Skorm"],
     mid:   ["nak","dur","gosh","tar","vek","mok","rash","gan","duk","zar"],
-    end:   ["ash","uk","or","ek","an","ush","ar","ok"],
-    sur:   ["Brakka","Vorrik","Dassik","Mornn","Kharran","Suldat","Vekkor","Grathik","Dornash","Zekkur"],
+    end:   ["ash","uk","or","ek","an","uz","ar","ok","oz","ig","un","esh","om","az","yr","ud"],
+    sur:   ["Brakka","Vorrik","Dassok","Mornn","Kharran","Suldat","Vekkor","Grathun","Dornash","Zekkur","Hruvak","Tashurn"],
   },
   chiss: {
     label: "Chiss", meta: "tripartite, apostrophes",
@@ -409,15 +409,15 @@ const SPECIES = {
   rattataki: {
     label: "Rattataki", meta: "harsh, clipped",
     onset: ["Vrak","Dak","Kosh","Mor","Tek","Grask","Zul","Bron","Dre","Skir","Vol","Khar","Nas","Drov"],
-    mid:   ["nok","tar","gul","vek","rak","dun"],
-    end:   ["k","x","sh","r","n","z","ai"],
-    sur:   ["Drakk","Veng","Skarr","Morrn","Vorgh","Vraxx","Gornn","Drev"],
+    mid:   ["nok","tar","gul","vek","rak","dun","grok","zek","mor","dax"],
+    end:   ["k","x","sh","r","n","z","ai","ak","ek","or","ash","ux","iz","un","a","u","o"],
+    sur:   ["Drakk","Veng","Skarr","Morrn","Vorgh","Vraxx","Gornn","Drev","Khorvex","Zulgar","Nask","Drovik"],
   },
   cathar: {
     label: "Cathar", meta: "feline, rolling",
     onset: ["Ra","Sha","Mir","Ka","Tyr","Lor","Naa","Fey","Saa","Mar","Kor","Aru","Jha","Saw"],
-    mid:   ["rak","sha","mir","wan","rou","faa","ren","kaa","lor"],
-    end:   ["r","sh","a","an","rr","ai","or"],
+    mid:   ["rak","sha","mir","wan","rou","faa","ren","kaa","lor","rar","mor","shi","taa"],
+    end:   ["r","sh","a","an","rr","ai","or","ar","ur","ash","arn","eo","ia","oss","esh","o","ya","ea","ee","au"],
     surGen: true,
   },
   togruta: {
@@ -432,7 +432,7 @@ const SPECIES = {
     onset: ["Ki","Naa","Oo","Shaa","Ee","Vaa","Loo","Mee","Saa","Nu","Oa","Yi","Wei","Suu"],
     mid:   ["too","sha","vee","loo","naa","mii","soo","wii"],
     end:   ["a","i","o","oo","ee","ya","ai"],
-    sur:   ["Fisal","Naadu","Looma","Vaesh","Oolan","Mistaa","Suuvi","Weshaa"],
+    sur:   ["Fisal","Naadu","Looma","Vaesh","Oolan","Mistar","Suuvi","Weshen","Naelo","Saavo"],
   },
 };
 
@@ -612,7 +612,7 @@ function buildOne(rng, opts) {
       tag = "Epithet \u00b7 " + tag;
     }
   }
-  return { display, tag };
+  return { display, tag, first, last };
 }
 
 /* ---------- UI wiring ---------- */
@@ -711,7 +711,8 @@ function runGeneration(forceReroll) {
 
   const results = [];
   const seen = new Set();
-  const endCount = {};            // cap repeated first-name endings within one batch
+  const firstEndCount = {};       // cap repeated first-name endings within one batch
+  const surEndCount = {};         // ...and surname endings, so neither dominates a set
   let guard = 0;
   while (results.length < 6 && guard < 60) {
     const rng = makeRng(base + "#" + guard);
@@ -720,10 +721,14 @@ function runGeneration(forceReroll) {
     if (seen.has(r.display)) continue;
     // diversity guard: don't let a single ending dominate a batch (relaxes near the
     // attempt limit so we always fill 6, even for small syllable banks)
-    const firstWord = r.display.split(/[\s,]/)[0] || "";
-    const ek = firstWord.slice(-2).toLowerCase();
-    if (guard < 45 && (endCount[ek] || 0) >= 2) continue;
-    endCount[ek] = (endCount[ek] || 0) + 1;
+    const fEnd = (r.first || "").replace(/'/g, "").slice(-2).toLowerCase();
+    const sEnd = (r.last || "").replace(/'/g, "").slice(-2).toLowerCase();
+    if (guard < 45) {
+      if (fEnd && (firstEndCount[fEnd] || 0) >= 2) continue;
+      if (sEnd && (surEndCount[sEnd] || 0) >= 2) continue;
+    }
+    if (fEnd) firstEndCount[fEnd] = (firstEndCount[fEnd] || 0) + 1;
+    if (sEnd) surEndCount[sEnd] = (surEndCount[sEnd] || 0) + 1;
     seen.add(r.display);
     results.push(r);
   }
