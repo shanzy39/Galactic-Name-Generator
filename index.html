@@ -401,10 +401,10 @@ const SPECIES = {
   },
   pureblood: {
     label: "Sith Pureblood", meta: "ancient, sibilant",
-    onset: ["Kha","Zash","Vol","Aru","Dre","Mae","Tyr","Vael","Sora","Khem","Ajun","Dra","Vorr","Sael","Zar","Nys"],
-    mid:   ["ra","zo","ven","kar","mo","su","ri","sa","zar","na","esh"],
-    end:   ["ar","us","oth","is","an","yr","esh","a"],
-    sur:   ["Zashar","Voloth","Khaaris","Dravos","Sythar","Morzath","Velis","Tharil","Ravos","Kessar","Vornyth","Azhul"],
+    onset: ["Kha","Zash","Vol","Aru","Dre","Mae","Tyr","Vael","Sora","Khem","Ajun","Dra","Vorr","Sael","Zar","Nys","Iso","Vask","Ozar"],
+    mid:   ["ra","zo","ven","kar","mo","su","ri","sa","zar","na","esh","vor","tha","nul","seth","zhu"],
+    end:   ["ath","oth","is","yr","esh","us","ix","un","or","iss","ul","en","ar","eus","a","o","i","ai","eo"],
+    sur:   ["Voloth","Vaszek","Kharis","Dravos","Sythiss","Morzael","Velshen","Tharil","Ravun","Kessur","Azhul","Nashai","Dratheus","Vexar","Sorvex","Vornyth"],
   },
   rattataki: {
     label: "Rattataki", meta: "harsh, clipped",
@@ -462,13 +462,20 @@ const TONES = {
   sleek:    { extra: 0.10, hardEnd: 0.30 },  // Imperial Agent - short, clean
 };
 
-/* Pick an ending, biased toward consonant ("hard") or vowel ("soft") codas. */
-function pickEnd(rng, spec, hardEnd) {
+/* Pick an ending, biased toward consonant ("hard") or vowel ("soft") codas.
+ * `base` (the name so far) lets us avoid gluing on an ending that just repeats
+ * the previous vowel, e.g. "...ra" + "a" -> "raa"; this keeps endings varied. */
+function pickEnd(rng, spec, hardEnd, base) {
   const ends = spec.end || [""];
   const soft = ends.filter(e => e === "" || /[aeiou]$/i.test(e));
   const hard = ends.filter(e => e !== "" && /[^aeiou]$/i.test(e));
   const useHard = rng() < hardEnd;
-  const pool = useHard ? (hard.length ? hard : ends) : (soft.length ? soft : ends);
+  let pool = useHard ? (hard.length ? hard : ends) : (soft.length ? soft : ends);
+  const lastVowel = base && /[aeiou]$/i.test(base) ? base.slice(-1).toLowerCase() : "";
+  if (lastVowel) {
+    const varied = pool.filter(e => !e || e[0].toLowerCase() !== lastVowel);
+    if (varied.length) pool = varied;
+  }
   return pick(rng, pool);
 }
 
@@ -485,7 +492,7 @@ function genStandardName(rng, spec, tone) {
   // occasional extra syllable (brutal tones run longer, sleek/roguish stay short),
   // but never on an already-long base — keeps names pronounceable across the board
   if (rng() < tone.extra && name.length < 7) name += pick(rng, spec.mid);
-  name += pickEnd(rng, spec, tone.hardEnd);
+  name += pickEnd(rng, spec, tone.hardEnd, name);
   // tidy doubled letters at joins
   name = name.replace(/(.)\1\1+/g, "$1$1");
   if (spec.apostrophe && rng() < 0.6) {
@@ -499,7 +506,8 @@ function genStandardName(rng, spec, tone) {
 function genSurname(rng, spec, tone) {
   if (spec.surGen) {
     // build an original surname from the same banks
-    let s = pick(rng, spec.onset).trim() + pick(rng, spec.mid) + pickEnd(rng, spec, tone.hardEnd);
+    const sBase = pick(rng, spec.onset).trim() + pick(rng, spec.mid);
+    let s = sBase + pickEnd(rng, spec, tone.hardEnd, sBase);
     if (spec.apostrophe && rng() < 0.4) s = s.slice(0,2) + "'" + s.slice(2);
     return cap(s.replace(/(.)\1\1+/g, "$1$1"));
   }
@@ -544,7 +552,7 @@ function morphFromName(rng, raw, spec, isSurname, tone) {
   if (spec.chiss) {
     out = out + pick(rng, spec.coreEnd);
   } else {
-    out += pickEnd(rng, spec, tone.hardEnd);
+    out += pickEnd(rng, spec, tone.hardEnd, out);
   }
   out = out.replace(/(.)\1\1+/g, "$1$1");
   // apostrophes a touch less likely on surnames so first/last don't both get them
@@ -703,12 +711,19 @@ function runGeneration(forceReroll) {
 
   const results = [];
   const seen = new Set();
+  const endCount = {};            // cap repeated first-name endings within one batch
   let guard = 0;
   while (results.length < 6 && guard < 60) {
     const rng = makeRng(base + "#" + guard);
     const r = buildOne(rng, state);
     guard++;
     if (seen.has(r.display)) continue;
+    // diversity guard: don't let a single ending dominate a batch (relaxes near the
+    // attempt limit so we always fill 6, even for small syllable banks)
+    const firstWord = r.display.split(/[\s,]/)[0] || "";
+    const ek = firstWord.slice(-2).toLowerCase();
+    if (guard < 45 && (endCount[ek] || 0) >= 2) continue;
+    endCount[ek] = (endCount[ek] || 0) + 1;
     seen.add(r.display);
     results.push(r);
   }
